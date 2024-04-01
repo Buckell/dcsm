@@ -4,6 +4,8 @@
 > This is the latest specification of DCSM. Read this for documentation such as how to use
 > DCSM, implementation details, and more.
 
+> **Note:** This is a single-header DCSM message decoder for DMX controllers.
+
 ## About
 
 DCSM is a protocol designed for controlling USB DMX controllers. Over other protocols,
