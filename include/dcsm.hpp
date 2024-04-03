@@ -269,14 +269,14 @@ namespace dcsm {
 
         for (size_t i = 0; i < byte_count; ++i) {
             *(a_data + i) = 0
-            | 0b00000001 * a_set.test((i * 8) + 0)
-            | 0b00000010 * a_set.test((i * 8) + 1)
-            | 0b00000100 * a_set.test((i * 8) + 2)
-            | 0b00001000 * a_set.test((i * 8) + 3)
-            | 0b00010000 * a_set.test((i * 8) + 4)
-            | 0b00100000 * a_set.test((i * 8) + 5)
-            | 0b01000000 * a_set.test((i * 8) + 6)
-            | 0b10000000 * a_set.test((i * 8) + 7);
+            | 0b10000000 * a_set.test((i * 8) + 0)
+            | 0b01000000 * a_set.test((i * 8) + 1)
+            | 0b00100000 * a_set.test((i * 8) + 2)
+            | 0b00010000 * a_set.test((i * 8) + 3)
+            | 0b00001000 * a_set.test((i * 8) + 4)
+            | 0b00000100 * a_set.test((i * 8) + 5)
+            | 0b00000010 * a_set.test((i * 8) + 6)
+            | 0b00000001 * a_set.test((i * 8) + 7);
         }
     }
 
