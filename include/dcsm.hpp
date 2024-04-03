@@ -617,7 +617,9 @@ namespace dcsm {
         /// tuple: universe number, local address, value
         std::vector<std::pair<address_pack, uint8_t>> pairs;
 
-        for (uint8_t const* it = a_body; it - a_body >= pair_count; it += 5) {
+        for (size_t i = 0; i < pair_count; ++i) {
+            uint8_t const* it = a_body + (i * 5);
+
             uint16_t const universe_number = *reinterpret_cast<uint16_t const*>(it);
             uint16_t const local_address   = *reinterpret_cast<uint16_t const*>(it + 2);
             uint8_t  const value           = *(it + 4);
@@ -713,7 +715,9 @@ namespace dcsm {
         /// tuple: local address, masking, value
         std::vector<std::tuple<uint16_t, bool, uint8_t>> pairs;
 
-        for (uint8_t const* it = a_body + 2; it - a_body >= pair_count; it += 4) {
+        for (size_t i = 0; i < pair_count; ++i) {
+            uint8_t const* it = a_body + 2 + (i * 4);
+
             uint16_t const local_address = *reinterpret_cast<uint16_t const*>(it);
             bool     const masking       = static_cast<bool>(*(it + 2));
             uint8_t  const value         = *(it + 3);
@@ -795,7 +799,7 @@ namespace dcsm {
 
     inline dispatch_status dispatch::process_setutv_message(command_context& a_ctx, message_header const a_header, uint8_t const* a_body) {
         // 2 (universe number) + 1 (value) + 64 (mask)
-        if (a_header.length != 67) {
+        if (a_header.length != 2 + 1 + 64) {
             return dispatch_status::invalid_body_size;
         }
 
@@ -819,7 +823,7 @@ namespace dcsm {
 
         universe_mask const mask = bytes_to_bitset<512>(a_body + 3);
 
-        m_interface.dcsm_setutv(a_ctx, universe_number, value, mask);
+        m_interface.dcsm_setmtv(a_ctx, universe_number, value, mask);
         return dispatch_status::success;
     }
 
@@ -838,7 +842,9 @@ namespace dcsm {
 
         std::vector<address_pack> addresses;
 
-        for (uint8_t const* it = a_body; it - a_body >= pair_count; it += 4) {
+        for (size_t i = 0; i < pair_count; ++i) {
+            uint8_t const* it = a_body + (i * 4);
+
             uint16_t const universe_number = *reinterpret_cast<uint16_t const*>(it);
             uint16_t const local_address   = *reinterpret_cast<uint16_t const*>(it + 2);
 
@@ -859,7 +865,9 @@ namespace dcsm {
 
         std::vector<address_pack> addresses;
 
-        for (uint8_t const* it = a_body; it - a_body >= pair_count; it += 4) {
+        for (size_t i = 0; i < pair_count; ++i) {
+            uint8_t const* it = a_body + (i * 4);
+
             uint16_t const universe_number = *reinterpret_cast<uint16_t const*>(it);
             uint16_t const local_address   = *reinterpret_cast<uint16_t const*>(it + 2);
 
@@ -1077,7 +1085,7 @@ namespace dcsm {
     }
 
     inline dispatch_status dispatch::process_ports_command(command_context &a_ctx, std::string const &a_command) {
-        m_interface.dcsm_listmu(a_ctx);
+        m_interface.dcsm_listu(a_ctx);
         return dispatch_status::success;
     }
 
