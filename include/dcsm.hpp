@@ -37,8 +37,8 @@ namespace dcsm {
     struct dispatch_interface {
         virtual ~dispatch_interface() = default;
 
-        virtual void dcsm_id    (command_context& a_ctx) noexcept {}
-        virtual void dcsm_setu  (command_context& a_ctx, uint16_t a_universe, uint8_t const* a_data) noexcept {}
+        virtual void dcsm_id    (command_context& a_ctx) {}
+        virtual void dcsm_setu  (command_context& a_ctx, uint16_t a_universe, uint8_t const* a_data) {}
         /// pair: address, value
         virtual void dcsm_setv  (command_context& a_ctx, std::vector<std::pair<address_pack, uint8_t>> const& a_pairs) {}
         virtual void dcsm_getu  (command_context& a_ctx, uint16_t a_universe) {}
