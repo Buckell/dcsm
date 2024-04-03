@@ -4,7 +4,15 @@
 > This is the latest specification of DCSM. Read this for documentation such as how to use
 > DCSM, implementation details, and more.
 
-> **Note:** This is a single-header DCSM message decoder for DMX controllers.
+> **Note:** This is a single-header DCSM message decoder for DMX controllers. This does not
+> encode/send any messages.
+
+## This Library
+
+This library is a single-header include designed for embedding within DCSM devices to process 
+incoming messages and commands. This library does not send DCSM messages, perform any of the
+associated actions with messages or commands, et cetera. The header only parses and processes
+commands and messages, exposing messages and data in an easy interface.
 
 ## About
 
