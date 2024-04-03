@@ -21,7 +21,8 @@ namespace dcsm {
     enum class dispatch_status {
         success           = 0x00,
         invalid_body_size = 0x01,
-        malformed_syntax  = 0x02
+        malformed_syntax  = 0x02,
+        invalid_header    = 0x03
     };
 
     struct command_context {
