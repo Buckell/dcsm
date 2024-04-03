@@ -183,6 +183,7 @@ namespace dcsm {
                 { "createmask", &dispatch::process_createmask_command },
                 { "masks",      &dispatch::process_masks_command      },
                 { "deletemask", &dispatch::process_deletemask_command },
+                { "clearmask",  &dispatch::process_clearmask_command  },
             };
         }
 
@@ -223,6 +224,7 @@ namespace dcsm {
         dispatch_status process_createmask_command (command_context& a_ctx, std::string const& a_command);
         dispatch_status process_masks_command      (command_context& a_ctx, std::string const& a_command);
         dispatch_status process_deletemask_command (command_context& a_ctx, std::string const& a_command);
+        dispatch_status process_clearmask_command  (command_context& a_ctx, std::string const& a_command);
     };
 
     // --------------------------- UTILITY ---------------------------
@@ -1110,6 +1112,15 @@ namespace dcsm {
         uint16_t const universe_number = std::stoul(universe_number_string);
 
         m_interface.dcsm_delmu(a_ctx, universe_number);
+        return dispatch_status::success;
+    }
+
+    inline dispatch_status dispatch::process_clearmask_command(command_context &a_ctx, std::string const &a_command) {
+        std::string universe_number_string = a_command;
+        trim(universe_number_string);
+        uint16_t const universe_number = std::stoul(universe_number_string);
+
+        m_interface.dcsm_clrmu(a_ctx, universe_number);
         return dispatch_status::success;
     }
 
