@@ -118,6 +118,27 @@ namespace dcsm {
             return (this->*m_message_handlers[a_header.opcode])(ctx, a_header, a_body);
         }
 
+        /**
+         * @brief Process a direct control interface message and dispatch.
+         *
+         * @param a_body The body of the message.
+         *
+         * @return Status of call, either success or an error code.
+         */
+        dispatch_status process_message(uint8_t const* a_body) {
+            command_context ctx{};
+            ctx.mode = interface_mode::direct_control;
+
+            if (*a_body != 0x00) {
+                return dispatch_status::invalid_header;
+            }
+
+            message_header header{};
+            std::memcpy(&header, a_body + 1, sizeof(header));
+
+            return (this->*m_message_handlers[header.opcode])(ctx, header, a_body + 5);
+        }
+
     private:
         void initialize_handlers() {
             m_message_handlers = {
