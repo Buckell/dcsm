@@ -95,7 +95,7 @@ namespace dcsm {
         dispatch_status process_command(std::string const& a_command) {
             size_t const command_name_end_index = a_command.find_first_of(' ');
             std::string const command_name = a_command.substr(0, command_name_end_index);
-            std::string const command_body = a_command.substr(command_name_end_index + 1);
+            std::string const command_body = command_name_end_index == std::string::npos ? "" : a_command.substr(command_name_end_index + 1);
 
             command_context ctx{};
             ctx.mode = interface_mode::command;
