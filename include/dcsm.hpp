@@ -175,7 +175,7 @@ namespace dcsm {
                 { "copy",       &dispatch::process_copy_command       },
                 { "patch",      &dispatch::process_patch_command      },
                 { "patches",    &dispatch::process_patches_command    },
-                { "upatch",     &dispatch::process_unpatch_command    },
+                { "unpatch",    &dispatch::process_unpatch_command    },
                 { "framerate",  &dispatch::process_framerate_command  },
                 { "identify",   &dispatch::process_identify_command   },
                 { "ports",      &dispatch::process_ports_command      },
