@@ -13,6 +13,8 @@
 #include <array>
 
 namespace dcsm {
+    constexpr char version[] = "1.0.0";
+
     enum class interface_mode {
         command,
         direct_control
