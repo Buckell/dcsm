@@ -11,6 +11,7 @@
 #include <bitset>
 #include <string>
 #include <array>
+#include <cstring>
 
 namespace dcsm {
     constexpr char version[] = "1.0.0";
