@@ -72,6 +72,23 @@ namespace dcsm {
         uint16_t length;
     };
 
+    /**
+     * @brief Cast ambiguous data to a type without undefined behavior.
+     *
+     * @tparam t_type The type to which to convert.
+     *
+     * @param a_source The data from which to convert.
+     *
+     * @return The resultant converted value.
+     */
+    template <typename t_type>
+    t_type bit_cast(void const* a_source) {
+        t_type value;
+                    // Cast to avoid warning of swapped arguments.
+        std::memcpy(reinterpret_cast<void*>(&value), a_source, sizeof(t_type));
+        return value;
+    }
+
     class dispatch {
     public:
         using command_handler = dispatch_status (dispatch::*)(command_context&, std::string const&);
@@ -606,7 +623,7 @@ namespace dcsm {
             return dispatch_status::invalid_body_size;
         }
 
-        uint16_t const universe_number = *reinterpret_cast<uint16_t const*>(a_body);
+        auto const universe_number = bit_cast<uint16_t>(a_body);
 
         m_interface.dcsm_setu(a_ctx, universe_number, a_body + 2);
         return dispatch_status::success;
@@ -626,9 +643,17 @@ namespace dcsm {
         for (size_t i = 0; i < pair_count; ++i) {
             uint8_t const* it = a_body + (i * 5);
 
-            uint16_t const universe_number = *reinterpret_cast<uint16_t const*>(it);
-            uint16_t const local_address   = *reinterpret_cast<uint16_t const*>(it + 2);
-            uint8_t  const value           = *(it + 4);
+            /*
+             * Previously reinterpret_casts, but a strange error occurred on the RP2040/Arduino platform while casting
+             * the bytes at offset 5 in the data buffer to a uint16_t caused a crash. The problem was isolated to the
+             * single cast at offset 5. Casting at offset 6 worked fine. Fine with one pair, but two will cause fault.
+             *
+             * Solution was to use an implementation of bit_cast, which is technically the correct way to do it, anyway.
+             */
+
+            auto const universe_number = bit_cast<uint16_t>(it);
+            auto const local_address   = bit_cast<uint16_t>(it + 2);
+            auto const value           = *(it + 4);
 
             pairs.emplace_back(address_pack{ universe_number, local_address }, value);
         }
@@ -643,7 +668,7 @@ namespace dcsm {
             return dispatch_status::invalid_body_size;
         }
 
-        uint16_t const universe_number = *reinterpret_cast<uint16_t const*>(a_body);
+        auto const universe_number = bit_cast<uint16_t>(a_body);
 
         m_interface.dcsm_getu(a_ctx, universe_number);
         return dispatch_status::success;
@@ -672,7 +697,7 @@ namespace dcsm {
             return dispatch_status::invalid_body_size;
         }
 
-        uint16_t const universe_number = *reinterpret_cast<uint16_t const*>(a_body);
+        auto const universe_number = bit_cast<uint16_t>(a_body);
 
         m_interface.dcsm_newmu(a_ctx, universe_number);
         return dispatch_status::success;
@@ -689,7 +714,7 @@ namespace dcsm {
             return dispatch_status::invalid_body_size;
         }
 
-        uint16_t const universe_number = *reinterpret_cast<uint16_t const*>(a_body);
+        auto const universe_number = bit_cast<uint16_t>(a_body);
 
         m_interface.dcsm_delmu(a_ctx, universe_number);
         return dispatch_status::success;
@@ -701,7 +726,7 @@ namespace dcsm {
             return dispatch_status::invalid_body_size;
         }
 
-        uint16_t const universe_number = *reinterpret_cast<uint16_t const*>(a_body);
+        auto const universe_number = bit_cast<uint16_t>(a_body);
 
         universe_mask const mask = bytes_to_bitset<512>(a_body + 2);
 
@@ -715,7 +740,7 @@ namespace dcsm {
             return dispatch_status::invalid_body_size;
         }
 
-        uint16_t const universe_number = *reinterpret_cast<uint16_t const*>(a_body);
+        auto const universe_number = bit_cast<uint16_t>(a_body);
         size_t const pair_count = (a_header.length - 2) / 4;
 
         /// tuple: local address, masking, value
@@ -724,7 +749,7 @@ namespace dcsm {
         for (size_t i = 0; i < pair_count; ++i) {
             uint8_t const* it = a_body + 2 + (i * 4);
 
-            uint16_t const local_address = *reinterpret_cast<uint16_t const*>(it);
+            auto     const local_address = bit_cast<uint16_t>(it);
             bool     const masking       = static_cast<bool>(*(it + 2));
             uint8_t  const value         = *(it + 3);
 
@@ -741,7 +766,7 @@ namespace dcsm {
             return dispatch_status::invalid_body_size;
         }
 
-        uint16_t const universe_number = *reinterpret_cast<uint16_t const*>(a_body);
+        auto const universe_number = bit_cast<uint16_t>(a_body);
 
         m_interface.dcsm_getmu(a_ctx, universe_number);
         return dispatch_status::success;
@@ -753,7 +778,7 @@ namespace dcsm {
             return dispatch_status::invalid_body_size;
         }
 
-        uint16_t const universe_number = *reinterpret_cast<uint16_t const*>(a_body);
+        auto const universe_number = bit_cast<uint16_t>(a_body);
 
         m_interface.dcsm_clrmu(a_ctx, universe_number);
         return dispatch_status::success;
@@ -765,9 +790,9 @@ namespace dcsm {
             return dispatch_status::invalid_body_size;
         }
 
-        uint16_t const input_universe  = *reinterpret_cast<uint16_t const*>(a_body);
-        uint16_t const output_universe = *reinterpret_cast<uint16_t const*>(a_body + 2);
-        uint16_t const mask_universe   = *reinterpret_cast<uint16_t const*>(a_body + 4);
+        auto const input_universe  = bit_cast<uint16_t>(a_body);
+        auto const output_universe = bit_cast<uint16_t>(a_body + 2);
+        auto const mask_universe   = bit_cast<uint16_t>(a_body + 4);
 
         m_interface.dcsm_patch(a_ctx, input_universe, output_universe, mask_universe);
         return dispatch_status::success;
@@ -779,7 +804,7 @@ namespace dcsm {
             return dispatch_status::invalid_body_size;
         }
 
-        uint16_t const output_universe = *reinterpret_cast<uint16_t const*>(a_body);
+        auto const output_universe = bit_cast<uint16_t>(a_body);
 
         m_interface.dcsm_unpat(a_ctx, output_universe);
         return dispatch_status::success;
@@ -796,8 +821,8 @@ namespace dcsm {
             return dispatch_status::invalid_body_size;
         }
 
-        uint16_t const source_universe      = *reinterpret_cast<uint16_t const*>(a_body);
-        uint16_t const destination_universe = *reinterpret_cast<uint16_t const*>(a_body + 2);
+        auto const source_universe      = bit_cast<uint16_t>(a_body);
+        auto const destination_universe = bit_cast<uint16_t>(a_body);
 
         m_interface.dcsm_copy(a_ctx, source_universe, destination_universe);
         return dispatch_status::success;
@@ -809,8 +834,8 @@ namespace dcsm {
             return dispatch_status::invalid_body_size;
         }
 
-        uint16_t const universe_number = *reinterpret_cast<uint16_t const*>(a_body);
-        uint8_t  const value           = *(a_body + 2);
+        auto const universe_number = bit_cast<uint16_t>(a_body);
+        auto const value           = *(a_body + 2);
 
         universe_mask const mask = bytes_to_bitset<512>(a_body + 3);
 
@@ -824,8 +849,8 @@ namespace dcsm {
             return dispatch_status::invalid_body_size;
         }
 
-        uint16_t const universe_number = *reinterpret_cast<uint16_t const*>(a_body);
-        uint8_t  const value           = *(a_body + 2);
+        auto const universe_number = bit_cast<uint16_t>(a_body);
+        auto const value           = *(a_body + 2);
 
         universe_mask const mask = bytes_to_bitset<512>(a_body + 3);
 
@@ -851,8 +876,8 @@ namespace dcsm {
         for (size_t i = 0; i < pair_count; ++i) {
             uint8_t const* it = a_body + (i * 4);
 
-            uint16_t const universe_number = *reinterpret_cast<uint16_t const*>(it);
-            uint16_t const local_address   = *reinterpret_cast<uint16_t const*>(it + 2);
+            auto const universe_number = bit_cast<uint16_t>(it);
+            auto const local_address   = bit_cast<uint16_t>(it + 2);
 
             addresses.emplace_back(universe_number, local_address);
         }
@@ -874,8 +899,8 @@ namespace dcsm {
         for (size_t i = 0; i < pair_count; ++i) {
             uint8_t const* it = a_body + (i * 4);
 
-            uint16_t const universe_number = *reinterpret_cast<uint16_t const*>(it);
-            uint16_t const local_address   = *reinterpret_cast<uint16_t const*>(it + 2);
+            auto const universe_number = bit_cast<uint16_t>(it);
+            auto const local_address   = bit_cast<uint16_t>(it + 2);
 
             addresses.emplace_back(universe_number, local_address);
         }
